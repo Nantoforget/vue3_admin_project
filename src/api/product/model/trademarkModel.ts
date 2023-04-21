@@ -13,4 +13,3 @@ export interface trademarkPageLimitModel {
   total?: number
 }
 
-//

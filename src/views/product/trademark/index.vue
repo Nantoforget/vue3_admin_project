@@ -26,7 +26,7 @@
       </el-table-column >
     </el-table >
     <!--分页器-->
-    <el-pagination v-model:current-page="current" v-model:page-size="pageSize" :page-sizes="[3,5,7,9]" :small="false" :total="total" background layout=", prev, pager, next, jumper,->,sizes,total" style="margin-top: 20px" @size-change="val=>getTrademarkList(current,val)" @current-change="val=>getTrademarkList(val,pageSize)" />
+    <el-pagination v-model:current-page="current" v-model:page-size="pageSize" :page-sizes="[3,5,7,9]" :small="false" :total="total" background layout=", prev, pager, next, jumper,->,sizes,total" style="margin-top: 30px" @size-change="val=>getTrademarkList(current,val)" @current-change="val=>getTrademarkList(val,pageSize)" />
   </el-card >
   <!--    添加或修改的页面-->
   <el-dialog v-model="outerVisible" :title="trademark.id? '修改品牌':'添加品牌'" draggable >
@@ -131,7 +131,6 @@ const loading = ref<boolean>(false);
 let current = ref<number>(1);//当前是第几页
 let pageSize = ref<number>(3);//每页几条数据
 let total = ref<number>(0);//总共有多少条数据
-
 
 
 //发送求情，获取数据

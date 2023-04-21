@@ -25,7 +25,7 @@ export const findByIdApi = (keyword: string) => request.get<any, trademarkPageLi
 export const getByIdApi = (id: number) => request.get<any, trademarkModel>(`${Api.getTrademarkById}/${id}`);
 
 //获取列表
-export const getListApi = () => request.get<any, trademarkPageLimitModel>(Api.getTrademarkList);
+export const getListApi = () => request.get<any, trademarkModel[]>(Api.getTrademarkList);
 
 //批量查找
 export const findByTrademarkIdListApi = (ids: []) => request.post<any, trademarkPageLimitModel>(Api.findTrademarkByTrademarkIdList, ids);

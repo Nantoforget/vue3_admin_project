@@ -1,7 +1,7 @@
 <template >
   <CategorySelector :isDisabled="isDisabled" @clearList="clearList" @getCategoryList="getCategoryList" ></CategorySelector >
   <!--    第二张card卡片-->
-  <el-card v-if="isDisabled" shadow="hover" style="margin-top: 30px" >
+  <el-card v-if="isDisabled" shadow="hover" >
     <!--        添加按钮-->
     <el-button :disabled="category3Id==0" :icon="Plus" type="primary" @click="saveOrUpdate" >添加属性</el-button >
     <!--        表格数据（商品属性值）-->

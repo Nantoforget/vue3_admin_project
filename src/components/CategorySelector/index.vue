@@ -1,5 +1,5 @@
 <template >
-  <el-card >
+  <el-card shadow="hover" style="margin-bottom: 30px;" >
     <span style="margin-right: 15px;font-weight: bold" >一级分类</span >
     <el-select v-model="value1" :disabled="!isDisabled" placeholder="请选择" style="margin-right: 30px" @change="select($event,category1)" >
       <el-option v-for="item in category1" :key="item.id" :disabled="!isDisabled" :label="item.name" :value="item.name" />
@@ -46,7 +46,6 @@ const category = (val: string, attrList: categoryListModel) => {
   return attrList.find((ele) => {
     return ele.name == val;
   });
-
 };
 //分类列表选中某一项
 const select = async (val: string, attrList: categoryListModel) => {
