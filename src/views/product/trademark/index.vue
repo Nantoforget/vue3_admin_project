@@ -73,15 +73,13 @@ import {ElLoading, ElMessage, ElMessageBox} from "element-plus";
 import {onMounted, reactive, ref} from "vue";
 import type {trademarkModel} from "@/api/product/model/trademarkModel";
 import type {UploadProps, FormInstance, FormRules} from "element-plus";
-//定义根路径图片地址
-const BASE_URL = import.meta.env.VITE_API_URL;
+import {BASE_URL} from "@/main";//定义根路径图片地址
 
 //上传图片
 const uploadLoading = ref<boolean>(false);//上传图片的加载效果
 const handleAvatarSuccess: UploadProps["onSuccess"] = (response, uploadFile) => {//上传图片成功的方法
   uploadLoading.value = false;
   trademark.logoUrl = response.data;
-
 };
 const beforeAvatarUpload: UploadProps["beforeUpload"] = (rawFile) => {//上传图片的限制
   const isJpgOrPng = ["image/jpeg", "image/png"].includes(rawFile.type);

@@ -9,7 +9,8 @@ import "./styles/index.scss";
 import ElSvg from "./components/SvgIcon/ElSvg";
 import "./permission";
 
-
+//定义根路径图片地址
+export const BASE_URL = import.meta.env.VITE_API_URL;
 const app = createApp(App);
 ElSvg(app);
 app

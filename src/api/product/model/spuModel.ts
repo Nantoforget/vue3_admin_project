@@ -26,7 +26,7 @@ export type spuInfoListModel = spuInfoModel[];
 
 //spu销售属性对象
 export interface spuSaleAttrModel {
-  id: number,//id
+  id?: number,//id
   spuId: number,//spu的id
   baseSaleAttrId: number,//销售属性id
   saleAttrName: string,//名字
@@ -39,8 +39,8 @@ export type spuSaleAttrListModel = spuSaleAttrModel[]
 //spu销售属性值对象
 export interface spuSaleAttrValueModel {
   baseSaleAttrId: number,//销售属性id
-  id: number,//id
-  isChecked: string,//是否选中
+  id?: number,//id
+  isChecked: null,//是否选中
   saleAttrName: string,//属性名称
   saleAttrValueName: string,//属性值名称
   spuId: number,//spuId
@@ -51,7 +51,7 @@ export type spuSaleAttrValueListModel = spuSaleAttrValueModel[]
 
 //spu数据图片对象
 export interface spuImageModel {
-  id: number,//id
+  id?: number,//id
   imgName: string,//图片名称
   imgUrl: string,//图片地址
   spuId: number//spuId
