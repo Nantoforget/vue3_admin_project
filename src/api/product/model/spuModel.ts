@@ -16,7 +16,7 @@ export interface spuInfoModel {
   description: string,//spu描述
   category3Id: number,//3级分类的id
   tmId?: number,//品牌id
-  tmName?: string,//品牌名称
+  // tmName?: string,//品牌名称
   spuSaleAttrList: spuSaleAttrListModel,//销售属性列表
   spuImageList: spuImageListModel//图片列表
 }
@@ -31,6 +31,7 @@ export interface spuSaleAttrModel {
   baseSaleAttrId: number,//销售属性id
   saleAttrName: string,//名字
   spuSaleAttrValueList: spuSaleAttrValueListModel//销售属性列表
+  value?: string,//选择的值，自己定义的，提交数据时要删除
 }
 
 //spu销售属性对象数组
@@ -55,6 +56,8 @@ export interface spuImageModel {
   imgName: string,//图片名称
   imgUrl: string,//图片地址
   spuId: number//spuId
+  isDefault?: string,//是否是默认图片，自定义的
+  spuImgId?: number,//spuId自定义的
 }
 
 //spu数据图片对象数组

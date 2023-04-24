@@ -10,7 +10,7 @@
       <el-table-column label="SPU描述" prop="description" />
       <el-table-column label="操作" >
         <template #default="{row}" >
-          <el-button :icon="Plus" type="primary" @click="addSku(row.id)" ></el-button >
+          <el-button :icon="Plus" type="primary" @click="addSku(row)" ></el-button >
           <el-button :icon="Edit" type="primary" @click="addOrUpdateSpu(row)" ></el-button >
           <el-button :icon="InfoFilled" type="info" @click="skuListPage(row.id,row.spuName)" ></el-button >
           <el-popconfirm :title="`你确定要删除${row.spuName}?`" @confirm="deleteSpu(row.id)" >
@@ -39,8 +39,7 @@
         <el-input v-model="spuInfo.description" :rows="4" placeholder="请输入SPU描述信息" type="textarea" />
       </el-form-item >
       <el-form-item label="SPU图片" prop="spuImageList" >
-        <!--        成功的回调:on-success="handleAvatarSuccess"-->
-        <el-upload v-model:file-list="fileList" :action="`${BASE_URL}/admin/product/fileUpload`" :on-preview="handlePictureCardPreview" :on-remove="handleRemove" list-type="picture-card" show-file-list >
+        <el-upload v-model:file-list="fileList" :action="`${BASE_URL}/admin/product/fileUpload`" :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-success="handleAvatarSuccess" list-type="picture-card" show-file-list >
           <el-icon >
             <Plus />
           </el-icon >
@@ -82,7 +81,7 @@
   <!--  SKU列表v-if="dialogTableVisible"-->
   <SkuList ref="skuList" v-loading="loadingSkuList" ></SkuList >
   <!--  添加sku-->
-  <AddSkuInfo v-if="showCard==2" :spuGetSkuById="spuGetSkuById" ></AddSkuInfo >
+  <AddSkuInfo v-if="showCard==2" :spuGetSkuInfo="spuGetSkuInfo" @cancel="cancel" ></AddSkuInfo >
 </template >
 
 <script lang="ts" setup >
@@ -231,9 +230,28 @@ const skuListPage = async (spuId: number, spuName: string) => {
   loadingSkuList.value = false;//关闭加载效果
   skuList.value.dialogTableVisible = true;//开启sku列表页面
 };
-const spuGetSkuById = ref<number>(0);//spuId
-const addSku = (spuId: number) => {
-  spuGetSkuById.value = spuId;
+
+//添加sku数据时穿给子组件的数据
+const spuGetSkuInfo = reactive({
+  spuName: "",
+  spuId: 0,
+  category1Id: 0,
+  category2Id: 0,
+  category3Id: 0,
+  tmId: 0,
+});
+/**
+ * 添加sku
+ * @param row 列表数据对象
+ */
+const addSku = (row: spuInfoModel) => {
+  isDisabled.value = false;
+  spuGetSkuInfo.spuName = row.spuName;
+  spuGetSkuInfo.spuId = row.id as number;
+  spuGetSkuInfo.category1Id = category1Id.value;
+  spuGetSkuInfo.category2Id = category2Id.value;
+  spuGetSkuInfo.category3Id = category3Id.value;
+  spuGetSkuInfo.tmId = row.tmId as number;
   showCard.value = 2;
 };
 //第三个卡片card添加或修改的卡片card***********************
@@ -319,7 +337,7 @@ const fileList = ref<UploadUserFile[]>([]);//用于显示图片的数组
 const handleRemove: UploadProps["onRemove"] = () => {
   spuInfo.spuImageList = [];//清空
   fileList.value.forEach((ele) => {//将最后的图片保存在spu的图片列表中，用于请求的参数
-    spuInfo.spuImageList.push(cloneDeep({imgName: ele.name, imgUrl: ele.url as any, spuId: spuInfo.id as any}));
+    spuInfo.spuImageList.push(cloneDeep({imgName: ele.name, imgUrl: ele.url as string, spuId: spuInfo.id as number, status: ele.status, uid: ele.uid}));
   });
 };
 /**
@@ -327,9 +345,12 @@ const handleRemove: UploadProps["onRemove"] = () => {
  * @param response 图片的地址
  * @param uploadFile 上传的信息，包含response
  */
-// const handleAvatarSuccess: UploadProps["onSuccess"] = (response, uploadFile) => {
-//   console.log(response, uploadFile);
-// };
+const handleAvatarSuccess: UploadProps["onSuccess"] = (response, uploadFile) => {
+  spuInfo.spuImageList = [];//清空
+  fileList.value.forEach((ele) => {//将最后的图片保存在spu的图片列表中，用于请求的参数
+    spuInfo.spuImageList.push(cloneDeep({imgName: ele.name, imgUrl: (ele.response as any || {}).data, spuId: spuInfo.id as number, status: ele.status, uid: ele.uid}));
+  });
+};
 /**
  * 点击放大镜，放大图片
  * @param uploadFile 选中的图片信息
@@ -521,9 +542,7 @@ const loadingAddOrUpdate = ref<boolean>(false);
 const saveSpu = async () => {
   loadingAddOrUpdate.value = true;//loading效果
   //整合数据
-  spuInfo.spuImageList = fileList.value as any;
   spuInfo.spuSaleAttrList = saleTableDateList.value;
-
   try {
     if (spuInfo.id) {//修改
       await updateSpuInfoApi(spuInfo);

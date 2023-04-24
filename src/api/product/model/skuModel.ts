@@ -23,8 +23,8 @@ export type skuInfoListModel = skuInfoModel[]
 
 //sku图片对象
 export interface skuImageModel {
-  id: number,
-  skuId: number,
+  id?: number,
+  skuId?: number,
   imgName: string,
   imgUrl: string,
   spuImgId: number,//spu图片id
@@ -36,10 +36,10 @@ export type skuImageListModel = skuImageModel[]
 
 //sku属性值对象
 export interface skuAttrValueModel {
-  id: number,
+  id?: number,
   attrId: number,
   valueId: number,
-  skuId: number,
+  skuId?: number,
   attrName: string,//属性名称
   valueName: string//属性值名称
 }
@@ -49,8 +49,8 @@ export type skuAttrValueListModel = skuAttrValueModel[]
 
 //sku销售属性值对象
 export interface skuSaleAttrValueModel {
-  id: number,
-  skuId: number,
+  id?: number,
+  skuId?: number,
   spuId: number,
   saleAttrValueId: number,
   saleAttrId: number,

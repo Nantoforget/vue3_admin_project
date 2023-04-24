@@ -16,7 +16,7 @@ export const findSkuInfoByKeywordApi = (keyword: string) => request.get<any, sku
 export const findSkuInfoBySkuIdListApi = (skuIdList: []) => request.post<any, skuInfoListModel>("/admin/product/inner/findSkuInfoBySkuIdList", skuIdList);
 
 
-interface pageModel {
+export interface pageModel {
   page: number,
   limit: number
 }

@@ -16,5 +16,6 @@ export interface attrInfoListModel {
   attrName: string,
   categoryId: number,
   categoryLevel: number,
-  attrValueList: attrValueListModel
+  attrValueList: attrValueListModel,
+  value?: string
 }
