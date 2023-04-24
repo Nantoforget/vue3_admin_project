@@ -17,8 +17,8 @@ export const findSkuInfoBySkuIdListApi = (skuIdList: []) => request.post<any, sk
 
 
 export interface pageModel {
-  page: number,
-  limit: number
+  page: number,//第几页
+  limit: number//每页几条数据
 }
 
 export const skuPageLimitApi = ({page, limit}: pageModel) => request.get<any, skuPageLimitMode>(`/admin/product/list/${page}/${limit}`);
