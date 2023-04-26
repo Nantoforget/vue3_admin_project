@@ -2,7 +2,6 @@ import {getAttrInfoListApi} from "@/api/product/attr";
 import type {attrInfoListModel} from "@/api/product/model/attrModel";
 import type {spuSaleAttrListModel, spuImageListModel} from "@/api/product/model/spuModel";
 import {getSpuImageListApi, getSpuSaleAttrListApi} from "@/api/product/sku";
-import {getSpuInfoByIdApi} from "@/api/product/spu";
 import {defineStore} from "pinia";
 import {ref} from "vue";
 

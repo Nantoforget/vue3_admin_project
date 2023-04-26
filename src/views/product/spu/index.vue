@@ -5,17 +5,25 @@
   <el-card v-if="showCard ==0" shadow="hover" >
     <el-button :disabled="category3Id==0" :icon="Plus" style="margin-bottom: 20px" type="primary" @click="addOrUpdateSpu" >添加SPU</el-button >
     <el-table v-loading="loading" :data="spuDate.records" border row-key="id" style="width: 100%" >
-      <el-table-column align="center" label="序号" prop="id" type="index" width="100" />
+      <el-table-column align="center" label="序号" prop="id" type="index" width="100" >
+        <template v-slot="{$index}" >{{ pageSize * (current - 1) + $index + 1 }}</template >
+      </el-table-column >
       <el-table-column label="SPU名称" prop="spuName" />
       <el-table-column label="SPU描述" prop="description" />
       <el-table-column label="操作" >
-        <template #default="{row}" >
-          <el-button :icon="Plus" type="primary" @click="addSku(row)" ></el-button >
-          <el-button :icon="Edit" type="primary" @click="addOrUpdateSpu(row)" ></el-button >
-          <el-button :icon="InfoFilled" type="info" @click="skuListPage(row.id,row.spuName)" ></el-button >
-          <el-popconfirm :title="`你确定要删除${row.spuName}?`" @confirm="deleteSpu(row.id)" >
+        <template #default="{row,$index}" >
+          <el-tooltip class="box-item" content="添加SKU" effect="dark" placement="top-start" >
+            <el-button :icon="Plus" type="primary" @click="addSku(row)" ></el-button >
+          </el-tooltip >
+          <el-tooltip class="box-item" content="修改SPU" effect="dark" placement="top-start" >
+            <el-button :icon="Edit" type="primary" @click="addOrUpdateSpu(row)" ></el-button >
+          </el-tooltip >
+          <el-tooltip class="box-item" content="查看SKU" effect="dark" placement="top-start" >
+            <el-button :icon="InfoFilled" type="info" @click="skuListPage(row.id,row.spuName)" ></el-button >
+          </el-tooltip >
+          <el-popconfirm :title="`你确定要删除${row.spuName}?`" @confirm="deleteSpu(row,$index)" >
             <template #reference >
-              <el-button :icon="Delete" type="danger" ></el-button >
+              <el-button :icon="Delete" title="删除SPU" type="danger" ></el-button >
             </template >
           </el-popconfirm >
         </template >
@@ -26,7 +34,7 @@
   </el-card >
   <!--  添加或修改-->
   <el-card v-else-if="showCard==1" v-loading="loadingAddOrUpdate" shadow="hover" >
-    <el-form :model="spuInfo" :rules="rules" >
+    <el-form ref="ruleFormRef" :model="spuInfo" :rules="rules" >
       <el-form-item label="SPU名称" prop="spuName" >
         <el-input v-model="spuInfo.spuName" />
       </el-form-item >
@@ -74,14 +82,14 @@
       </el-form-item >
     </el-form >
     <div style="margin-top: 30px" >
-      <el-button type="primary" @click="saveSpu" >保存</el-button >
+      <el-button type="primary" @click="saveSpu(ruleFormRef)" >保存</el-button >
       <el-button @click="cancel" >取消</el-button >
     </div >
   </el-card >
   <!--  SKU列表v-if="dialogTableVisible"-->
   <SkuList ref="skuList" v-loading="loadingSkuList" ></SkuList >
   <!--  添加sku-->
-  <AddSkuInfo v-if="showCard==2" :spuGetSkuInfo="spuGetSkuInfo" @cancel="cancel" ></AddSkuInfo >
+  <AddSkuInfo v-if="showCard==2" :getOneSkuInfo="spuGetSkuInfo" @cancel="cancel" ></AddSkuInfo >
 </template >
 
 <script lang="ts" setup >
@@ -101,7 +109,7 @@ import CategorySelector from "@/components/CategorySelector/index.vue";
 import AddSkuInfo from "@/views/product/spu/components/addSkuInfo.vue";
 import {Delete, Edit, Plus, InfoFilled} from "@element-plus/icons-vue";
 import {ElInput, ElMessage} from "element-plus";
-import type {FormRules, UploadProps, UploadUserFile} from "element-plus";
+import type {FormRules, UploadProps, UploadUserFile, FormInstance} from "element-plus";
 import {nextTick, reactive, ref} from "vue";
 import {BASE_URL} from "@/main";//定义根路径图片地址
 import {cloneDeep} from "lodash";
@@ -203,17 +211,26 @@ const addOrUpdateSpu = async (row: spuInfoModel) => {
   hasSaleAttr();//计算可用的销售属性
   showCard.value = 1;//显示修改或添加的页面卡片
 };
+
 /**
  * 删除spu对象
- * @param spuId spuId
+ * @param row 列表对象
+ * @param index 在这一页的索引值
  */
-const deleteSpu = async (spuId: number) => {
-  try {
-    await deleteSpuBySpuIdApi(spuId);
+const deleteSpu = async (row: spuInfoModel, index: number) => {
+  const num = pageSize.value * (current.value - 1) + index + 1;//第几条数据的标志
+  if (num == spuDate.total && index == 0) {
+    await deleteSpuBySpuIdApi(row.id as number);
     ElMessage.success("删除成功");
-    await getSpuInfoListByPageLimit();
-  } catch (e) {
-    ElMessage.error("出现问题了");
+    await getSpuInfoListByPageLimit(current.value - 1, pageSize.value);
+  } else {
+    try {
+      await deleteSpuBySpuIdApi(row.id as number);
+      ElMessage.success("删除成功");
+      await getSpuInfoListByPageLimit();
+    } catch (e) {
+      ElMessage.error("出现问题了");
+    }
   }
 };
 const skuList = ref<any>();//获取子组件节点
@@ -269,6 +286,8 @@ const spuInfo = reactive<spuInfoModel>({
 const tmName = ref<string>("");
 //保存品牌列表
 const records = ref<trademarkModel[]>([]);
+//fromDOM
+const ruleFormRef = ref<FormInstance>();
 //表单验证规则
 const rules = reactive<FormRules>({
   spuName: [
@@ -276,17 +295,17 @@ const rules = reactive<FormRules>({
     {min: 1, message: "必须输入SPU名称", trigger: "blur"},
   ],
   tmId: [
-    {required: true, message: "必须选择一个品牌", trigger: "blur"},
+    {required: true, message: "必须选择一个品牌", trigger: "change"},
   ],
   description: [
     {required: true, message: "必须输入SPU描述", trigger: "blur"},
     {min: 1, message: "必须输入SPU名称", trigger: "blur"},
   ],
   spuImageList: [
-    {required: true, message: "必须上传SPU图片", trigger: "blur"},
+    {required: true, type: "array", message: "必须上传SPU图片", trigger: "change"},
   ],
   spuSaleAttrList: [
-    {required: true, message: "必须添加SPU销售属性", trigger: "blur"},
+    {required: true, type: "array", message: "必须添加SPU销售属性", trigger: "change"},
   ],
 });
 
@@ -342,10 +361,10 @@ const handleRemove: UploadProps["onRemove"] = () => {
 };
 /**
  * 图片上传成功的操作，将图片保存
- * @param response 图片的地址
- * @param uploadFile 上传的信息，包含response
+ *  response 图片的地址
+ *  uploadFile 上传的信息，包含response
  */
-const handleAvatarSuccess: UploadProps["onSuccess"] = (response, uploadFile) => {
+const handleAvatarSuccess: UploadProps["onSuccess"] = () => {
   spuInfo.spuImageList = [];//清空
   fileList.value.forEach((ele) => {//将最后的图片保存在spu的图片列表中，用于请求的参数
     spuInfo.spuImageList.push(cloneDeep({imgName: ele.name, imgUrl: (ele.response as any || {}).data, spuId: spuInfo.id as number, status: ele.status, uid: ele.uid}));
@@ -539,24 +558,31 @@ const reset = () => {
 };
 const loadingAddOrUpdate = ref<boolean>(false);
 //保存
-const saveSpu = async () => {
-  loadingAddOrUpdate.value = true;//loading效果
-  //整合数据
-  spuInfo.spuSaleAttrList = saleTableDateList.value;
-  try {
-    if (spuInfo.id) {//修改
-      await updateSpuInfoApi(spuInfo);
-    } else {//添加
-      await saveSpuInfoApi(spuInfo);
+const saveSpu = async (formEl: FormInstance | undefined) => {
+  spuInfo.spuSaleAttrList = saleTableDateList.value;//整合数据
+  if (!formEl) return;
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      loadingAddOrUpdate.value = true;//loading效果
+      //整合数据
+      try {
+        if (spuInfo.id) {//修改
+          await updateSpuInfoApi(spuInfo);
+        } else {//添加
+          await saveSpuInfoApi(spuInfo);
+        }
+        ElMessage.success("操作成功");
+      } catch (e) {
+        ElMessage.error("操作失败");
+      }
+      showCard.value = 0;//关闭修改添加页面
+      loadingAddOrUpdate.value = false;//loading效果关闭
+      await getSpuInfoListByPageLimit();//重新获取数据
+      isDisabled.value = true;
+    } else {
+      ElMessage.warning("请按验证修改数据");
     }
-    ElMessage.success("操作成功");
-  } catch (e) {
-    ElMessage.error("操作失败");
-  }
-  showCard.value = 0;//关闭修改添加页面
-  loadingAddOrUpdate.value = false;//loading效果关闭
-  await getSpuInfoListByPageLimit();//重新获取数据
-  isDisabled.value = true;
+  });
 };
 /**
  * 取消按钮，关闭修改或添加页面

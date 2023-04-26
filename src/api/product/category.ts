@@ -23,6 +23,7 @@ enum Api {
   updateCategory3 = "/admin/product/updateeCategory3",//修改三级分类
 }
 
+
 //请求方法
 
 //获取分类数据
@@ -35,7 +36,7 @@ export const getStairListApi = () => request.get<any, categoryListModel>(Api.Get
 export const getSecondaryListApi = (category1Id: number) => request.get<any, categoryListModel>(`${Api.GetSecondaryList}/${category1Id}`);
 export const getThreeLevelListApi = (category2Id: number) => request.get<any, categoryListModel>(`${Api.GetThreeLevelList}/${category2Id}`);
 
-export const findCategory3ByCategory3IdListApi = (data: categoryListModel) => request.post<any, categoryListModel>(Api.GetThreeLevelBy3IdList);
+export const findCategory3ByCategory3IdListApi = (data: number[]) => request.post<any, categoryListModel>(Api.GetThreeLevelBy3IdList);
 
 //删除
 export const removeCategory1Api = (id: number) => request.delete<any, null>(`${Api.RemoveCategory1}/${id}`);

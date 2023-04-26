@@ -1,10 +1,12 @@
 import router from "@/router";
+import {cloneDeep} from "lodash";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 import pinia from "@/stores";
 import {useUserInfoStore} from "@/stores/userInfo";
 // import {ElMessage} from "element-plus";
 import getPageTitle from "@/utils/get-page-title";
+import type {RouteRecordRaw} from "vue-router";
 
 NProgress.configure({showSpinner: false});
 const userInfoStore = useUserInfoStore(pinia);
@@ -34,7 +36,7 @@ router.beforeEach(async (to, from, next) => {
       const hasLogin = !!userInfoStore.name;
       // 如果已经登陆直接放行
       if (hasLogin) {
-        next();
+          next();
       } else { // 如果还没有登陆
         try {
           // 异步请求获取用户信息(包含权限数据) ==> 动态注册用户的权限路由 => 当次跳转不可见
@@ -62,7 +64,7 @@ router.beforeEach(async (to, from, next) => {
     } else {
       // 如果没在白名单中, 跳转到登陆路由携带原目标路径
       next(`/login?redirect=${to.path}`);
-      // 完成进度条  当次跳转中断了, 要进行一个新的跳转了
+      // 完成进度条  当次跳转中断了, 要进行一个新地跳转了
       NProgress.done();
     }
   }
@@ -72,3 +74,25 @@ router.beforeEach(async (to, from, next) => {
 router.afterEach(() => {
   NProgress.done();
 });
+
+//判断用户重新登陆要跳转的路由是否有权限访问，(现在效果是没有权限就404；要实现的是每页权限跳转首页)
+// const userRoute: any = [];
+// const userRoutes = (arrRoutes: RouteRecordRaw[], name: string) => {
+//   console.log(arrRoutes);
+//   console.log(name);
+//   return arrRoutes.filter((route) => {
+//     if (route.name == name) {
+//       return true;
+//     }
+//     if (route.children && route.children.length > 0) {
+//       console.log(route.children);
+//       const R: any = userRoutes(route.children, name);
+//       console.log(R);
+//       if (R.length > 0) {
+//         userRoute.push(...R);
+//       }
+//       return R;
+//     }
+//     return false;
+//   });
+// };

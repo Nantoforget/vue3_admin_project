@@ -34,6 +34,7 @@ export default {
 <script lang="ts" setup >
 import SvgIcon from "@/components/SvgIcon/index.vue";
 import {useUserInfoStore} from "@/stores/userInfo";
+import {ElMessage} from "element-plus";
 import type {FormInstance} from "element-plus";
 import {nextTick, ref, watch} from "vue";
 import {useRoute, useRouter} from "vue-router";
@@ -106,7 +107,11 @@ const handleLogin = async () => {
   const {username, password} = loginForm.value;
   try {
     await userInfoStore.login(username, password);
-    router.push({path: redirect.value || "/"});
+    await router.push({path: redirect.value || "/"});
+    ElMessage({//提示信息
+      message: "获取用户信息成功",
+      type: "success",
+    });
   } finally {
     loading.value = false;
   }

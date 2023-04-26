@@ -29,7 +29,6 @@ export const staticRoutes: Array<RouteRecordRaw> = [
       hidden: true,
     },
   },
-
   {
     path: "/",
     component: () => import("@/layout/index.vue"),
@@ -44,6 +43,57 @@ export const staticRoutes: Array<RouteRecordRaw> = [
       },
     }],
   },
+
+
+];
+
+
+/**
+ * 定义动态路由
+ */
+export const allAsyncRoutes: Array<RouteRecordRaw> = [
+  //权限管理路由
+  {
+    name: "Acl",
+    path: "/acl",
+    component: () => import("@/layout/index.vue"),
+    redirect: "/acl/user/list",
+    meta: {
+      title: "权限管理",
+      icon: "ele-Setting",
+    },
+    children: [
+      {
+        name: "User",
+        path: "user/list",
+        component: () => import("@/views/acl/user/index.vue"),
+        meta: {title: "用户管理"},
+      },
+      {
+        name: "Role",
+        path: "role/list",
+        component: () => import("@/views/acl/role/index.vue"),
+        meta: {title: "角色管理"},
+      },
+      {
+        name: "RoleAuth",
+        path: "role/auth",
+        component: () => import("@/views/acl/role/roleAuth.vue"),
+        meta: {
+          title: "角色授权",
+          isHide: true,
+          activeMenu: "/acl/role/list",
+        },
+      },
+      {
+        name: "Permission",
+        path: "permission/list",
+        component: () => import("@/views/acl/permission/index.vue"),
+        meta: {title: "菜单管理"},
+      },
+    ],
+  },
+  //商品管理路由
   {
     name: "Product",
     path: "/product",
@@ -87,6 +137,9 @@ export const staticRoutes: Array<RouteRecordRaw> = [
     ],
   },
 
+];
+//任意路由
+export const anyRouter: Array<RouteRecordRaw> = [
   /* 匹配任意的路由 必须最后注册 */
   {
     path: "/:pathMatch(.*)",
@@ -97,9 +150,3 @@ export const staticRoutes: Array<RouteRecordRaw> = [
     },
   },
 ];
-
-
-/**
- * 定义动态路由
- */
-export const allAsyncRoutes: Array<RouteRecordRaw> = [];

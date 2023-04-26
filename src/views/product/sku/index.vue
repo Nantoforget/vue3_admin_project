@@ -13,31 +13,34 @@
       <el-table-column label="价格(元)" prop="price" />
       <el-table-column label="操作" >
         <template #default="{row}" >
-          <el-button v-if="row.isSale ==0" :icon="Top" size="small" type="info" @click="isOnOrUpSale(row)" ></el-button >
-          <el-button v-if="row.isSale ==1" :icon="Bottom" size="small" type="success" @click="isOnOrUpSale(row)" ></el-button >
-          <el-button :icon="Plus" size="small" type="primary" ></el-button >
-          <el-button :icon="InfoFilled" size="small" type="info" @click="showSkuInfoDrawer(row.id)" ></el-button >
+          <el-button v-if="row.isSale ==0" :icon="Top" size="small" title="上架" type="info" @click="isOnOrUpSale(row)" ></el-button >
+          <el-button v-if="row.isSale ==1" :icon="Bottom" size="small" title="下架" type="success" @click="isOnOrUpSale(row)" ></el-button >
+          <el-button :icon="Edit" size="small" title="修改SKU" type="primary" @click="updateSku(row)" ></el-button >
+          <el-button :icon="InfoFilled" size="small" title="查看SKU" type="info" @click="showSkuInfoDrawer(row.id)" ></el-button >
           <el-popconfirm :title="`确定要删除${row.skuName}?`" @confirm="delSku(row)" >
             <template #reference >
-              <el-button :icon="Delete" size="small" type="danger" ></el-button >
+              <el-button :icon="Delete" size="small" title="删除SKU" type="danger" ></el-button >
             </template >
           </el-popconfirm >
         </template >
       </el-table-column >
     </el-table >
-    <!--    pageSizes每页显示多少条数据，是一个数组；total总条数； getDate父组件的数据获取方法-->
-    <Pagination :pageSizes="pageSizes" :total="tableData.total" @getDate="getSkuInfoDate" />
+    <!--    pageSizes每页显示多少条数据的切换数据，是一个数组；pageSize每页多少条数据；total总条数； getDate父组件的数据获取方法-->
+    <Pagination :pageSize="pageSize" :pageSizes="pageSizes" :total="tableData.total" @getDate="getSkuInfoDate" />
   </el-card >
+  <!--  SKU详情-->
   <SkuInfoDrawer ref="skuInfoDrawer" ></SkuInfoDrawer >
+  <!--  修改SKU-->
+  <!--  <AddSkuInfo :getOneSkuInfo="spuGetSkuInfo" @cancel="cancel" ></AddSkuInfo >-->
 </template >
 
 <script lang="ts" setup >
 import type {skuInfoModel, skuPageLimitMode} from "@/api/product/model/skuModel";
-import {cancelSaleApi, deleteSkuBySkuIdApi, isOnSaleApi, skuPageLimitApi} from "@/api/product/sku";
+import {cancelSaleApi, deleteSkuBySkuIdApi, getSkuInfoBySkuIdApi, isOnSaleApi, skuPageLimitApi} from "@/api/product/sku";
 import type {pageModel} from "@/api/product/sku";
 import Pagination from "@/components/Pagination/index.vue";
 import SkuInfoDrawer from "@/views/product/sku/components/SkuInfoDrawer/index.vue";
-import {Delete, InfoFilled, Plus, Bottom, Top} from "@element-plus/icons-vue";
+import {Delete, InfoFilled, Bottom, Top, Edit} from "@element-plus/icons-vue";
 import {ElMessage} from "element-plus";
 import {reactive, ref} from "vue";
 
@@ -50,8 +53,8 @@ const tableData = reactive<skuPageLimitMode>({
   searchCount: true,
   pages: 0,//总页数
 });
-
 const pageSizes = ref<number[]>([10, 15, 20, 25]);//显示页码数
+const pageSize = ref<number>(10);//每页条数
 const loading = ref<boolean>(false);//加载效果
 /**
  * 获取sku列表
@@ -89,6 +92,15 @@ const showSkuInfoDrawer = async (skuId: number) => {
   skuInfoDrawer.value.skuDrawer = true;//修改子组件数据
 };
 
+const skuInfo = ref([]);
+
+const updateSku = async (row: skuInfoModel) => {
+  console.log(row);
+  const a = await getSkuInfoBySkuIdApi(row.id as number);
+  console.log(a);
+};
+
+
 /**
  * 删除sku
  * @param row sku列表对象
@@ -96,6 +108,14 @@ const showSkuInfoDrawer = async (skuId: number) => {
 const delSku = async (row: skuInfoModel) => {
   await deleteSkuBySkuIdApi(row.id as number);//删除
   await getSkuInfoDate({page: tableData.current, limit: tableData.size});//刷新数据
+};
+
+const showUpdateSku = ref<boolean>(false);//修改SKU页面的显示与否
+/**
+ * 取消按钮，关闭修改或添加页面
+ */
+const cancel = () => {
+  showUpdateSku.value = false;
 };
 </script >
 

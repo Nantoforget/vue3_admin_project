@@ -1,22 +1,22 @@
 <template >
   <el-card shadow="hover" >
-    <el-form label-width="120px" >
+    <el-form ref="ruleFormRef" :model="skuInfo" :rules="rules" label-width="120px" >
       <el-form-item label="SPU名称" >
-        {{ spuGetSkuInfo.spuName }}
+        {{ getOneSkuInfo.spuName }}
       </el-form-item >
-      <el-form-item label="SKU名称" >
+      <el-form-item label="SKU名称" prop="skuName" >
         <el-input v-model="skuInfo.skuName" placeholder="请输入SKU名称" />
       </el-form-item >
-      <el-form-item label="价格(元)" >
+      <el-form-item label="价格(元)" prop="price" >
         <el-input-number v-model="skuInfo.price" controls-position="right" style="width: 100%;" />
       </el-form-item >
-      <el-form-item label="重量(千克)" >
+      <el-form-item label="重量(千克)" prop="weight" >
         <el-input-number v-model="skuInfo.weight" :precision="2" controls-position="right" style="width: 100%; " text-align="left" />
       </el-form-item >
-      <el-form-item label="规格描述" >
+      <el-form-item label="规格描述" prop="skuDesc" >
         <el-input v-model="skuInfo.skuDesc" :rows="4" placeholder="请输入SKU规格描述" type="textarea" />
       </el-form-item >
-      <el-form-item label="平台属性" >
+      <el-form-item label="平台属性" prop="skuAttrValueList" >
         <div v-for="attr in addSkuStore.skuAttr" :key="attr.id" style="margin: 0 30px 15px 0" >
           <span style="font-weight: bold;margin-right: 15px" >{{ attr.attrName }}</span >
           <el-select v-model="attr.value" placeholder="请选择" style="width: 240px" @change="attrSelect(attr)" >
@@ -24,7 +24,7 @@
           </el-select >
         </div >
       </el-form-item >
-      <el-form-item label="销售属性" >
+      <el-form-item label="销售属性" prop="skuSaleAttrValueList" >
         <div v-for="sale in addSkuStore.skuSaleAttr" :key="sale.id" style="margin-right: 30px" >
           <span style="font-weight: bold;margin-right: 15px" >{{ sale.saleAttrName }}</span >
           <el-select v-model="sale.value" placeholder="请选择" style="width: 240px" @change="saleSelect(sale)" >
@@ -32,7 +32,7 @@
           </el-select >
         </div >
       </el-form-item >
-      <el-form-item label="图片列表" >
+      <el-form-item label="图片列表" prop="skuImageList" >
         <el-table ref="multipleTableRef" :data="addSkuStore.skuImg" :row-key="getImgId" border style="width: 100%" @selection-change="handleSelectionChange" >
           <el-table-column :reserve-selection="true" type="selection" width="55" />
           <el-table-column label="图片" >
@@ -51,7 +51,7 @@
       </el-form-item >
       <el-form-item >
         <template #default="{}" >
-          <el-button type="primary" @click="saveSkuInfo" >保存</el-button >
+          <el-button type="primary" @click="saveSkuInfo(ruleFormRef)" >保存</el-button >
           <el-button @click="emits('cancel')" >取消</el-button >
         </template >
       </el-form-item >
@@ -67,10 +67,11 @@ import type {spuSaleAttrModel} from "@/api/product/model/spuModel";
 import {saveSkuInfoApi} from "@/api/product/sku";
 import {useAddSKuStore} from "@/stores/product/skuStore";
 import {ElMessage, ElTable} from "element-plus";
+import type {FormInstance, FormRules} from "element-plus";
 import {cloneDeep} from "lodash";
 import {nextTick, onMounted, reactive, ref} from "vue";
 
-const props = defineProps(["spuGetSkuInfo"]);//接受父组件传递的spuId
+const props = defineProps(["getOneSkuInfo"]);//接受父组件传递的spuId
 const emits = defineEmits(["cancel"]);//接受父组件传递的取消方法
 //提取数据
 const addSkuStore = useAddSKuStore();
@@ -78,14 +79,14 @@ const addSkuStore = useAddSKuStore();
  * 发送请求得到skuInfo
  */
 const getSkuInfo = () => {
-  addSkuStore.getSKuSaleAttrList(props.spuGetSkuInfo.spuId);//销售属性
-  addSkuStore.getSkuAttrList(props.spuGetSkuInfo.category1Id, props.spuGetSkuInfo.category2Id, props.spuGetSkuInfo.category3Id);//平台属性
+  addSkuStore.getSKuSaleAttrList(props.getOneSkuInfo.spuId);//销售属性
+  addSkuStore.getSkuAttrList(props.getOneSkuInfo.category1Id, props.getOneSkuInfo.category2Id, props.getOneSkuInfo.category3Id);//平台属性
 };
 /**
  * 获取图片
  */
 const getImgListAndDefault = async () => {
-  await addSkuStore.getSkuImgList(props.spuGetSkuInfo.spuId);//图片列表
+  await addSkuStore.getSkuImgList(props.getOneSkuInfo.spuId);//图片列表
   checked();//默认选中操作
 };
 /**
@@ -102,6 +103,7 @@ const checked = () => {
 };
 
 onMounted(() => {
+  console.log(props.getOneSkuInfo);
   getSkuInfo();//获取数据
   getImgListAndDefault();//获取图片
 });
@@ -211,20 +213,28 @@ const handleSelectionChange = (selection: spuImageListModel) => {
 /**
  * 保存skuInfo
  */
-const saveSkuInfo = async () => {
-  skuInfo.category3Id = props.spuGetSkuInfo.category3Id;
-  skuInfo.spuId = props.spuGetSkuInfo.spuId;
-  skuInfo.tmId = props.spuGetSkuInfo.tmId;
-  if (!skuInfo.skuDefaultImg) {
-    skuInfo.skuDefaultImg = addSkuStore.skuImg[0].imgUrl;
-  }
-  try {
-    await saveSkuInfoApi(skuInfo);
-    emits("cancel");
-    ElMessage.success("操作成功");
-  } catch (e) {
-    ElMessage.error("操作失败");
-  }
+const saveSkuInfo = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return;
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      skuInfo.category3Id = props.getOneSkuInfo.category3Id;
+      skuInfo.spuId = props.getOneSkuInfo.spuId;
+      skuInfo.tmId = props.getOneSkuInfo.tmId;
+      if (!skuInfo.skuDefaultImg) {
+        skuInfo.skuDefaultImg = addSkuStore.skuImg[0].imgUrl;
+      }
+      try {
+        await saveSkuInfoApi(skuInfo);
+        emits("cancel");
+        ElMessage.success("操作成功");
+      } catch (e) {
+        ElMessage.error("操作失败");
+      }
+    } else {
+      // console.log("error submit!", fields);
+      ElMessage.warning("请按验证填写数据");
+    }
+  });
 };
 
 
@@ -242,6 +252,19 @@ const skuInfo = reactive<skuInfoModel>({
   spuId: 0,
   tmId: 0,
   weight: "",
+});
+
+//表单验证
+const ruleFormRef = ref<FormInstance>();
+//验证规则
+const rules = reactive<FormRules>({
+  skuName: [{required: true, message: "必须填写SKU名称", trigger: "blur"}],
+  price: [{required: true, type: "number", min: 1, message: "必须填写价格,且大于0", trigger: "blur"}],
+  weight: [{required: true, type: "number", min: 0.001, message: "必须填写重量,且大于0", trigger: "blur"}],
+  skuDesc: [{required: true, message: "必须填写规格描述", trigger: "blur"}],
+  skuAttrValueList: [{required: true, type: "array", message: "至少选择选择一个平台属性", trigger: "change"}],
+  skuSaleAttrValueList: [{required: true, type: "array", message: "至少选择选择一个销售属性", trigger: "change"}],
+  skuImageList: [{required: true, type: "array", message: "至少选择选择一个图片", trigger: "change"}],
 });
 </script >
 
