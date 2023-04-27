@@ -8,7 +8,7 @@ export const getPermissionApi = () => {
 };
 //给角色分配权限
 export const doAssignApi = (permissionVo: doAssignMoAclModel) => {
-  return request.post<any, null>(`/admin/acl/permission/doAssignAcl`);
+  return request.post<any, null>(`/admin/acl/permission/doAssign?roleId=${permissionVo.roleId}&permissionId=${permissionVo.permissionIdString}`);
 };
 
 //递归删除菜单
@@ -37,14 +37,3 @@ export const saveOrUpdateApi = (data: permissionModel) => {
   }
 };
 
-/*
-
-POST /admin/acl/permission/save
-
-
-GET /admin/acl/permission/toAssign/{roleId}
-
-
-PUT /admin/acl/permission/update
-
-*/

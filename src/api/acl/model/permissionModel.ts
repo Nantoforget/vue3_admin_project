@@ -12,7 +12,7 @@ export interface permissionModel {
   toCode?: string,
   type?: number,
   status?: string,
-  level: number,//几级菜单
+  level?: number,//几级菜单
   children?: permissionListModel,//子菜单
   select?: boolean,
 }
@@ -28,5 +28,6 @@ export interface getPermissionModel {
 //分配角色的数据类型
 export interface doAssignMoAclModel {
   permissionIdList: string[],
-  roleId: string
+  roleId: string,
+  permissionIdString: string
 }

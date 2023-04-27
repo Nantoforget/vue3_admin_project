@@ -82,6 +82,7 @@ export const allAsyncRoutes: Array<RouteRecordRaw> = [
         meta: {
           title: "角色授权",
           isHide: true,
+          hidden: true,
           activeMenu: "/acl/role/list",
         },
       },

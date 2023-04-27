@@ -1,20 +1,22 @@
 <template >
   <el-input :model-value="route.query.roleName" disabled style="margin-bottom: 20px" />
-  <el-tree :data="permissionData" :default-checked-keys="isSelect" :props="defaultProps" default-expand-all node-key="id" show-checkbox @check-change="getCheckedKeys" />
+  <el-tree :data="permissionData" :default-checked-keys="isSelect" :props="defaultProps" default-expand-all node-key="id" show-checkbox @check="getCheckedKeys" />
   <div style="margin-top: 10px" >
     <el-button type="primary" @click="okSave" >保存</el-button >
-    <el-button >取消</el-button >
+    <el-button @click="cancel" >取消</el-button >
   </div >
 </template >
 
 <script lang="ts" setup >
 
-import {toAssignByRoleId} from "@/api/acl/permission";
-import type {permissionListModel} from "@/api/acl/model/permissionModel";
-import {onBeforeMount, ref} from "vue";
-import {useRoute} from "vue-router";
+import {doAssignApi, toAssignByRoleId} from "@/api/acl/permission";
+import type {doAssignMoAclModel, permissionListModel, permissionModel} from "@/api/acl/model/permissionModel";
+import {ElMessage} from "element-plus";
+import {onBeforeMount, reactive, ref} from "vue";
+import {useRoute, useRouter} from "vue-router";
 
 const route = useRoute();//路由
+const router = useRouter();//路由器
 
 const permissionData = ref<permissionListModel>([]);//菜单数组
 /**
@@ -40,6 +42,14 @@ const defaultProps = {
 };//展示的标识
 
 const isSelect = ref<string[]>([]);//默认显示，收集的是id
+//保存菜单，请求参数
+const saveSelectArgument = reactive<doAssignMoAclModel>({
+  permissionIdList: [],//菜单Id
+  roleId: "",//角色Id
+  permissionIdString: "",//菜单id组成的字符串
+});
+
+
 /**
  * 默认展开解构,默认显示
  * @param arr 树结构的数据
@@ -56,15 +66,43 @@ const unfold = (arr: permissionListModel) => {
   });
 };
 
-const getCheckedKeys = (a: any, b: any, c: any, d: any) => {
-  console.log(a);
-  console.log(b);
-  console.log(c);
-  console.log(d);
+/**
+ * 点击节点复选框之后触发;共两个参数，依次为：传递给 data 属性的数组中该节点所对应的对象、树目前的选中状态对象，包含 checkedNodes、checkedKeys、halfCheckedNodes、halfCheckedKeys 四个属性
+ * @param selectObject 属性的数组中该节点所对应的对象
+ * @param allSelectObject 目前的选中状态对象含 checkedNodes、checkedKeys、halfCheckedNodes、halfCheckedKeys 四个属性
+ */
+const getCheckedKeys = (selectObject: permissionModel, allSelectObject: any) => {
+  saveSelectArgument.permissionIdList = [];//初始化
+  (allSelectObject.checkedNodes as permissionListModel).forEach((ele) => {//遍历得到数组
+    saveSelectArgument.permissionIdList.push(ele.id as string);
+  });
 };
 
-const okSave = () => {
+/**
+ * 保存分配菜单
+ */
+const okSave = async () => {
+  saveSelectArgument.roleId = route.query.id as string;//保存角色Id
+  if (saveSelectArgument.permissionIdList.length != 0) {
+    //将id数组组成字符串
+    saveSelectArgument.permissionIdString = saveSelectArgument.permissionIdList.reduce((prev, next) => {
+      return prev + "," + next;
+    });
+    await doAssignApi(saveSelectArgument);//操作菜单了，发送请求保存
+  }
+  //如果没有操作菜单，直接点击确定，直接进行路由跳转转返回;
+  ElMessage.success("操作成功");
+  cancel();
 };
+
+
+/**
+ * 取消
+ */
+const cancel = () => {
+  router.push({name: "Role"});
+};
+
 </script >
 
 <script lang="ts" >
