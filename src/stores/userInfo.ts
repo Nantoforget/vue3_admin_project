@@ -20,6 +20,7 @@ export const useUserInfoStore = defineStore("userInfo", {
     name: "",
     avatar: "",
     menuRoutes: [],
+    authBtnList: [],
   }),
 
   actions: {
@@ -38,6 +39,7 @@ export const useUserInfoStore = defineStore("userInfo", {
       const userRouters = this.getAllAsyncRoutes(userInfo.routes as string[], userAllAsyncRoute);//得到用户的路由信息
       this.addRouters([...userRouters, ...anyRouter]);//动态添加路由
       this.menuRoutes = [...staticRoutes, ...userRouters];//赋值
+      this.authBtnList = userInfo.buttons;
       this.name = userInfo.name;
       this.avatar = userInfo.avatar;
     },

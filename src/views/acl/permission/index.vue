@@ -68,7 +68,7 @@
 <script lang="ts" setup >
 
 import type {permissionListModel, permissionModel} from "@/api/acl/model/permissionModel";
-import {getPermissionApi, removePermissionApi, saveOrUpdateApi, updatePermissionApi} from "@/api/acl/permission";
+import {getPermissionApi, removePermissionApi, saveOrUpdateApi} from "@/api/acl/permission";
 import {Delete, Edit, InfoFilled, Plus} from "@element-plus/icons-vue";
 import {ElMessage} from "element-plus";
 import type {FormInstance, FormRules} from "element-plus";

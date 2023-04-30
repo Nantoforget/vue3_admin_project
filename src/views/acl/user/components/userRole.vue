@@ -26,7 +26,7 @@
 import type {doAssignRoleModel, userRolesListModel} from "@/api/acl/model/userModel";
 import {doAssignRoleWithUserApi} from "@/api/acl/user";
 import {ElMessage} from "element-plus";
-import {reactive, ref} from "vue";
+import {reactive, ref, watch} from "vue";
 
 const emits = defineEmits(["noShowUserRole"]);//自定义事件
 const dialogVisible = ref<boolean>(true);//是否显示对话框
@@ -38,12 +38,13 @@ const userId = ref<string>("");//用户id
 
 //多选状态
 const checkAll = ref(false);//全选
-const isIndeterminate = ref(true);//将checkbox变为多选框
+const isIndeterminate = ref(false);//将checkbox变为多选框
 /**
  * 全选状态
  * @param val 全选与否的标识，true全选中，false全不选
  */
 const handleCheckAllChange = (val: boolean) => {
+  console.log(checkAll.value);
   assignRoles.value = [];//重置
   if (val) {
     allRolesList.value.forEach((ele) => {
@@ -75,6 +76,20 @@ const isChecked = (all: userRolesListModel, user: string[]) => {
     });
   });
 };
+
+/**
+ * 监视全部角色数组的变化，当有用户有角色，默认选中，且全选状态变为横线
+ */
+watch(() => allRolesList.value, () => {
+  //找到选中的下标
+  const all = allRolesList.value.findIndex((ele) => {
+    return ele.isChecked == 1;
+  });
+  //如果有，将全选框变为没有全选的样式
+  if (all != -1) {
+    isIndeterminate.value = true;
+  }
+});
 
 //发送请求需要的数据类型
 const okUserRoles = reactive<doAssignRoleModel>({

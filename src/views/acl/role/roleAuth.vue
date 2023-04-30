@@ -73,6 +73,12 @@ const unfold = (arr: permissionListModel) => {
  */
 const getCheckedKeys = (selectObject: permissionModel, allSelectObject: any) => {
   saveSelectArgument.permissionIdList = [];//初始化
+  // 遍历得到数组
+  //选中的父级id
+  (allSelectObject.halfCheckedNodes as permissionListModel).forEach((ele) => {
+    saveSelectArgument.permissionIdList.push(ele.id as string);
+  });
+  //选中的id
   (allSelectObject.checkedNodes as permissionListModel).forEach((ele) => {//遍历得到数组
     saveSelectArgument.permissionIdList.push(ele.id as string);
   });
@@ -83,6 +89,7 @@ const getCheckedKeys = (selectObject: permissionModel, allSelectObject: any) => 
  */
 const okSave = async () => {
   saveSelectArgument.roleId = route.query.id as string;//保存角色Id
+  console.log(saveSelectArgument.permissionIdList);
   if (saveSelectArgument.permissionIdList.length != 0) {
     //将id数组组成字符串
     saveSelectArgument.permissionIdString = saveSelectArgument.permissionIdList.reduce((prev, next) => {

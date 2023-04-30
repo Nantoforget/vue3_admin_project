@@ -19,7 +19,7 @@
           <el-button :icon="InfoFilled" size="small" title="查看SKU" type="info" @click="showSkuInfoDrawer(row.id)" ></el-button >
           <el-popconfirm :title="`确定要删除${row.skuName}?`" @confirm="delSku(row)" >
             <template #reference >
-              <el-button :icon="Delete" size="small" title="删除SKU" type="danger" ></el-button >
+              <el-button v-hasBtn="'btn.Sku.remove'" :icon="Delete" size="small" title="删除SKU" type="danger" ></el-button >
             </template >
           </el-popconfirm >
         </template >
